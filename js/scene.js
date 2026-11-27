@@ -1,4 +1,4 @@
-/* うみくりのゲームばこ：商品写真のような、何もない背景に置いた木のおもちゃ箱（three.js）。
+/* うみくりのゲームばこ：何もない背景に置いた木のおもちゃ箱（three.js）。うしろの色の円はページ（CSS）。
    - 背景はページの色（canvas はすきとおり）。床は、かげだけをうつす。
    - 木目は ambientCG の CC0 テクスチャ（img/wood.webp）。
    - 箱の中のせいれいは、はこにわ暮らしの せいれいのモデル（models/wood.fbx）。
@@ -21,7 +21,7 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   const TL=new THREE.TextureLoader();
   const tex=u=>new Promise(res=>TL.load(u,t=>{t.colorSpace=THREE.SRGBColorSpace;res(t)},undefined,()=>res(null)));
   const [woodImg,...shots]=await Promise.all([tex('img/wood.webp'),...games.map(g=>tex(g.shots[0]))]);
-  await Promise.all(['700 64px "Shippori Mincho B1"','500 64px "Shippori Mincho B1"','italic 500 64px "Cormorant Garamond"'].map(f=>document.fonts.load(f).catch(()=>{})));
+  await Promise.all(['400 64px "Dela Gothic One"','800 64px "Rubik"','700 64px "M PLUS 2"'].map(f=>document.fonts.load(f).catch(()=>{})));
   const cvTex=(w,h,draw)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t};
   /* 明るいオーク：木の写真の色をうすくして、板のすきまを細く */
   const plank=(rows,tint,lift)=>cvTex(1024,1024,(x,w,h)=>{if(woodImg){x.filter='saturate(.55)';x.drawImage(woodImg.image,0,0,w,h);x.filter='none'}
@@ -37,7 +37,7 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   const mesh=(g,m,cast=true,recv=true)=>{const o=new THREE.Mesh(g,m);o.castShadow=cast;o.receiveShadow=recv;return o};
 
   /* ── 床：かげだけ ── */
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.16}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.22}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
   /* 接地のやわらかいかげ（箱の下） */
   const ao=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.2),new THREE.MeshBasicMaterial({transparent:true,depthWrite:false,map:cvTex(256,256,(x,w,h)=>{const g=x.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);g.addColorStop(0,'rgba(60,40,25,.32)');g.addColorStop(1,'rgba(60,40,25,0)');x.fillStyle=g;x.fillRect(0,0,w,h)})}));
   ao.rotation.x=-Math.PI/2;ao.position.y=.002;scene.add(ao);
@@ -58,9 +58,9 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   /* 金具は小さく、すみだけ */
   for(const sx of[-1,1])for(const sz of[-1,1]){const c=mesh(RB(.1,.1,.1,.012),M.metal);c.position.set(sx*(W/2-.03),H-.03,sz*(D/2-.03));chest.add(c)}
   /* 名札：真ちゅうの細いわくに、明朝の字 */
-  const plateTex=cvTex(1024,300,(x,w,h)=>{x.fillStyle='#f6efe3';x.fillRect(0,0,w,h);x.strokeStyle='#8a7350';x.lineWidth=3;x.strokeRect(18,18,w-36,h-36);
-    x.fillStyle='#2b2620';x.textAlign='center';x.textBaseline='middle';x.font='700 84px "Shippori Mincho B1"';x.fillText('うみくりのゲームばこ',w/2,h/2-18);
-    x.fillStyle='#8a7350';x.font='italic 500 46px "Cormorant Garamond"';x.fillText('Umikuri Games — Vol. 01',w/2,h/2+62)});
+  const plateTex=cvTex(1024,300,(x,w,h)=>{x.fillStyle='#fff4e2';x.beginPath();x.roundRect(6,6,w-12,h-12,40);x.fill();x.strokeStyle='#1f1b2e';x.lineWidth=10;x.stroke();
+    x.fillStyle='#1f1b2e';x.textAlign='center';x.textBaseline='middle';x.font='400 88px "Dela Gothic One"';x.fillText('うみくりのゲームばこ',w/2,h/2-20);
+    x.fillStyle='#ff5a36';x.font='800 42px "Rubik"';x.fillText('UMIKURI GAMES',w/2,h/2+66)});
   const plate=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.32),new THREE.MeshStandardMaterial({map:plateTex,roughness:.9}));plate.position.set(0,H*.5,D/2+.003);chest.add(plate);
 
   /* ふた */
@@ -72,12 +72,13 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   const addItem=(obj,pos,delay,kind,extra={})=>{obj.position.copy(pos);chest.add(obj);const it={obj,base:pos.clone(),baseRot:obj.rotation.clone(),delay,kind,pop:0,v:0,bounce:0,shake:0,hov:0,lift:.4,...extra};obj.traverse(o=>{o.userData.item=it});items.push(it);return it};
 
   games.forEach((g,gi)=>{
-    const coverTex=cvTex(768,960,(x,w,h)=>{x.fillStyle='#f6efe3';x.fillRect(0,0,w,h);
+    const coverTex=cvTex(768,960,(x,w,h)=>{x.fillStyle='#fff4e2';x.fillRect(0,0,w,h);
       const im=shots[gi]&&shots[gi].image;const top=h*.26;if(im){const ih=h-top-40,iw=ih*im.width/im.height;x.save();x.beginPath();x.rect(40,top,w-80,ih);x.clip();x.drawImage(im,(w-iw)/2,top,iw,ih);x.restore()}
-      x.fillStyle='#8a7350';x.font='italic 500 40px "Cormorant Garamond"';x.textAlign='left';x.fillText('No. '+String(gi+1).padStart(2,'0'),40,72);
-      x.fillStyle='#2b2620';x.font='700 92px "Shippori Mincho B1"';x.fillText(g.name,40,178);
-      x.fillStyle='#2b2620';x.fillRect(40,206,120,3)});
-    const spineTex=cvTex(128,960,(x,w,h)=>{x.fillStyle='#c46a4a';x.fillRect(0,0,w,h);x.save();x.translate(w/2,h/2);x.rotate(Math.PI/2);x.fillStyle='#f6efe3';x.font='700 52px "Shippori Mincho B1"';x.textAlign='center';x.textBaseline='middle';x.fillText(g.name,0,0);x.restore()});
+      x.fillStyle='#ff5a36';x.font='800 40px "Rubik"';x.textAlign='left';x.fillText('GAME '+String(gi+1).padStart(2,'0'),40,72);
+      x.fillStyle='#1f1b2e';x.font='400 88px "Dela Gothic One"';x.fillText(g.name,40,178);
+      x.save();x.translate(w-130,top+60);x.rotate(.18);x.fillStyle='#ffc83d';x.beginPath();x.arc(0,0,78,0,7);x.fill();x.strokeStyle='#1f1b2e';x.lineWidth=7;x.stroke();x.fillStyle='#1f1b2e';x.font='400 34px "Dela Gothic One"';x.textAlign='center';x.textBaseline='middle';x.fillText('FREE',0,-14);x.font='700 26px "M PLUS 2"';x.fillText('あそべる',0,24);x.restore();
+      x.strokeStyle='#1f1b2e';x.lineWidth=12;x.strokeRect(6,6,w-12,h-12)});
+    const spineTex=cvTex(128,960,(x,w,h)=>{x.fillStyle='#ff5a36';x.fillRect(0,0,w,h);x.save();x.translate(w/2,h/2);x.rotate(Math.PI/2);x.fillStyle='#fff4e2';x.font='400 50px "Dela Gothic One"';x.textAlign='center';x.textBaseline='middle';x.fillText(g.name,0,0);x.restore()});
     const plain=new THREE.MeshStandardMaterial({color:'#ece3d3',roughness:.7}),spine=new THREE.MeshStandardMaterial({map:spineTex,roughness:.6}),front=new THREE.MeshStandardMaterial({map:coverTex,roughness:.75,envMapIntensity:.3});
     const pw=.82,ph=1.02,pd=.13,box=new THREE.Mesh(RB(pw,ph,pd,.008,2),[spine,spine,plain,plain,front,plain]);box.castShadow=box.receiveShadow=true;box.position.y=ph/2;
     const grp=new THREE.Group();grp.add(box);grp.rotation.set(-.06,.06,-.03);
@@ -85,7 +86,7 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   });
 
   /* プレゼント（セージ色・1つだけ） */
-  {const s=.3,g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:'#9aa88a',roughness:.7}),rb=new THREE.MeshStandardMaterial({color:'#f3ead9',roughness:.5});
+  {const s=.3,g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:'#4f9dff',roughness:.55}),rb=new THREE.MeshStandardMaterial({color:'#ffc83d',roughness:.5});
     const b=mesh(RB(s,s,s,.02),m);b.position.y=s/2;g.add(b);
     const r1=mesh(new THREE.BoxGeometry(s+.01,s+.01,s*.12),rb);r1.position.y=s/2;g.add(r1);const r2=mesh(new THREE.BoxGeometry(s*.12,s+.01,s+.01),rb);r2.position.y=s/2;g.add(r2);
     for(const k of[-1,1]){const bow=mesh(new THREE.TorusGeometry(s*.15,s*.04,10,24),rb);bow.position.set(k*s*.13,s+s*.1,0);bow.rotation.set(0,.2,k*.6);bow.scale.set(1,.8,.6);g.add(bow)}
@@ -94,7 +95,7 @@ export async function startScene({canvas,games,onGame,onSay,sfx,reduce}){
   /* せいれい（はこにわ暮らしのモデル） */
   try{const f=await new FBXLoader().loadAsync('models/wood.fbx');f.updateMatrixWorld(true);
     const bb=new THREE.Box3().setFromObject(f),s=.58/bb.getSize(new THREE.Vector3()).y;f.scale.multiplyScalar(s);
-    const c={hood:'#8fb07a',cheek:'#ecb8a6',eye:'#2b2620',sprout:'#6f8f5a',acc:'#e6d3bb',body:'#fbf6ec'};
+    const c={hood:'#6fae4c',cheek:'#f2ac9f',eye:'#3f2a1c',sprout:'#5e8f43',acc:'#e8cdb0',body:'#fdf8ef'};
     const mat=(col,r=.65)=>new THREE.MeshStandardMaterial({color:col,roughness:r});
     f.traverse(o=>{if(!o.isMesh)return;const n=o.name.toLowerCase();o.castShadow=o.receiveShadow=true;o.frustumCulled=false;
       o.material=n.startsWith('eye')?mat(c.eye,.25):n.startsWith('cheek')?mat(c.cheek,.8):(n.startsWith('hood')||n.startsWith('hane'))?mat(c.hood,.7):n.startsWith('sprout')?mat(c.sprout):n.startsWith('headacc')?mat(c.acc):mat(c.body,.8)});
