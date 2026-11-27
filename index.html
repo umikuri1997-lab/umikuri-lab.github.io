@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>うみくりのゲームばこ</title>
+<meta name="description" content="うみくりが作ったゲームをならべています。ブラウザですぐ遊べます。">
+<meta property="og:title" content="うみくりのゲームばこ">
+<meta property="og:description" content="うみくりが作ったゲームをならべています。ブラウザですぐ遊べます。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://umikuri1997-lab.github.io/umikuri-lab.github.io/img/hakoniwa.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 木の箱に、ゲームのカードを入れてならべる */
+:root{
+  --bg:#f6eedd; --paper:#fffaf0; --line:#e6d6b4;
+  --ink:#4a3a2a; --muted:#7a6650;
+  --wood:#b07a45; --wood-d:#7d5430; --wood-l:#d6a56f;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:500;line-height:1.8;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+
+header{background:var(--wood);border-bottom:6px solid var(--wood-d);color:#fff;text-align:center;padding:36px 0 30px;
+  background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.06) 0 2px,transparent 2px 14px)}
+header h1{margin:0;font-size:clamp(28px,7vw,44px);font-weight:700;letter-spacing:.08em;text-shadow:0 2px 0 var(--wood-d)}
+header p{margin:6px 0 0;font-size:15px;color:#fbe9d0}
+
+main{padding:36px 0 48px}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:24px;list-style:none;margin:0;padding:0}
+.game{background:var(--paper);border:3px solid var(--line);box-shadow:0 5px 0 var(--line);display:flex;flex-direction:column}
+.game .pic{display:block;border-bottom:3px solid var(--line);overflow:hidden}
+.game .pic img{aspect-ratio:16/9;object-fit:cover;width:100%;transition:transform .25s ease}
+.game .pic:hover img{transform:scale(1.03)}
+.game .body{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
+.game h2{margin:0;font-size:20px;font-weight:700}
+.game .tag{margin:2px 0 8px;font-size:13px;color:var(--muted)}
+.game .desc{margin:0 0 14px;font-size:15px;flex:1}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;padding:8px 18px;font-weight:700;font-size:15px;text-decoration:none;border:3px solid var(--wood-d);transition:transform .08s ease,box-shadow .08s ease}
+.btn.play{background:var(--wood);color:#fff;box-shadow:0 4px 0 var(--wood-d)}
+.btn.play:hover{background:#bd8650}
+.btn.more{background:var(--paper);color:var(--wood-d);box-shadow:0 4px 0 var(--wood-l)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--wood-d)}
+.btn:focus-visible,.pic:focus-visible{outline:3px solid var(--wood-d);outline-offset:3px}
+
+footer{color:var(--muted);font-size:13px;text-align:center;padding:0 16px 28px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>うみくりのゲームばこ</h1>
+    <p>ブラウザですぐ遊べる、うみくりのゲーム</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ゲームを足すときは、<li class="game">…</li> を1つコピーして、名前・絵・説明・リンクをかえる。絵は img/ に入れる -->
+  <ul class="games">
+    <li class="game">
+      <a class="pic" href="https://umikuri1997-lab.github.io/Hakoniwa/about.html"><img src="img/hakoniwa.webp" width="1280" height="720" alt="はこにわ暮らしのタイトル画面"></a>
+      <div class="body">
+        <h2>はこにわ暮らし</h2>
+        <p class="tag">村づくり・スマホ／パソコン</p>
+        <p class="desc">荒れた土地をまもる守り神になって、ちいさなせいれいたちと村をつくる。夜はこわいものから村を守りながら、土地ごとのお話をすすめよう。</p>
+        <div class="btns">
+          <a class="btn play" href="https://umikuri1997-lab.github.io/Hakoniwa/index.html">あそぶ</a>
+          <a class="btn more" href="https://umikuri1997-lab.github.io/Hakoniwa/about.html">しょうかい</a>
+        </div>
+      </div>
+    </li>
+  </ul>
+</main>
+
+<footer>うみくりのゲームばこ</footer>
+</body>
+</html>
