@@ -4,82 +4,254 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>うみくりのゲームばこ</title>
-<meta name="description" content="うみくりが作ったゲームをならべています。ブラウザですぐ遊べます。">
+<meta name="description" content="うみくりが作ったゲームをつめこんだ、おもちゃ箱。ブラウザですぐ遊べます。">
 <meta property="og:title" content="うみくりのゲームばこ">
-<meta property="og:description" content="うみくりが作ったゲームをならべています。ブラウザですぐ遊べます。">
+<meta property="og:description" content="うみくりが作ったゲームをつめこんだ、おもちゃ箱。ブラウザですぐ遊べます。">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://umikuri1997-lab.github.io/umikuri-lab.github.io/img/hakoniwa.webp">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-/* 木の箱に、ゲームのカードを入れてならべる */
+/* おもちゃ箱：ひらくと木の箱のふたがあき、中のゲームがとびだす */
 :root{
-  --bg:#f6eedd; --paper:#fffaf0; --line:#e6d6b4;
-  --ink:#4a3a2a; --muted:#7a6650;
-  --wood:#b07a45; --wood-d:#7d5430; --wood-l:#d6a56f;
+  --wall:#f7ecd6; --wall2:#f1e0bf; --floor:#c99a63; --floor2:#b98955;
+  --ink:#4a3a2a; --muted:#7a6650; --paper:#fffaf0;
+  --wood:#c48a4f; --wood-l:#dba46a; --wood-d:#8a5a30; --wood-dd:#6a4322;
+  --red:#e86a5c; --blue:#5aa6d6; --yellow:#f2c14e; --green:#7cbf6a; --pink:#f29bb8;
+  --spring:cubic-bezier(.34,1.56,.64,1);
   color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:500;line-height:1.8;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:500;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:
+    radial-gradient(circle at 20px 20px,rgba(255,255,255,.55) 3px,transparent 4px) 0 0/40px 40px,
+    linear-gradient(180deg,var(--wall) 0%,var(--wall2) 100%);
+  background-color:var(--wall)}
+button{font:inherit;color:inherit}
 img{display:block;max-width:100%;height:auto}
-.wrap{max-width:960px;margin:0 auto;padding:0 16px}
 
-header{background:var(--wood);border-bottom:6px solid var(--wood-d);color:#fff;text-align:center;padding:36px 0 30px;
-  background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.06) 0 2px,transparent 2px 14px)}
-header h1{margin:0;font-size:clamp(28px,7vw,44px);font-weight:700;letter-spacing:.08em;text-shadow:0 2px 0 var(--wood-d)}
-header p{margin:6px 0 0;font-size:15px;color:#fbe9d0}
+/* 音のボタン */
+.snd{position:fixed;top:12px;right:12px;z-index:30;width:48px;height:48px;border:3px solid var(--wood-dd);background:var(--paper);box-shadow:0 4px 0 var(--wood-dd);cursor:pointer;display:grid;place-items:center;transition:transform .1s ease,box-shadow .1s ease}
+.snd:active{transform:translateY(3px);box-shadow:0 1px 0 var(--wood-dd)}
+.snd svg{width:26px;height:26px}
+.snd .on{display:none}.snd[aria-pressed="true"] .on{display:block}.snd[aria-pressed="true"] .off{display:none}
 
-main{padding:36px 0 48px}
-.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:24px;list-style:none;margin:0;padding:0}
-.game{background:var(--paper);border:3px solid var(--line);box-shadow:0 5px 0 var(--line);display:flex;flex-direction:column}
-.game .pic{display:block;border-bottom:3px solid var(--line);overflow:hidden}
-.game .pic img{aspect-ratio:16/9;object-fit:cover;width:100%;transition:transform .25s ease}
-.game .pic:hover img{transform:scale(1.03)}
-.game .body{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
-.game h2{margin:0;font-size:20px;font-weight:700}
-.game .tag{margin:2px 0 8px;font-size:13px;color:var(--muted)}
-.game .desc{margin:0 0 14px;font-size:15px;flex:1}
-.btns{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-block;padding:8px 18px;font-weight:700;font-size:15px;text-decoration:none;border:3px solid var(--wood-d);transition:transform .08s ease,box-shadow .08s ease}
-.btn.play{background:var(--wood);color:#fff;box-shadow:0 4px 0 var(--wood-d)}
-.btn.play:hover{background:#bd8650}
-.btn.more{background:var(--paper);color:var(--wood-d);box-shadow:0 4px 0 var(--wood-l)}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--wood-d)}
-.btn:focus-visible,.pic:focus-visible{outline:3px solid var(--wood-d);outline-offset:3px}
+/* タイトル */
+.title{text-align:center;padding:40px 16px 8px;position:relative;z-index:2}
+.title h1{margin:0;font-size:clamp(30px,8vw,58px);font-weight:900;letter-spacing:.04em;line-height:1.2;user-select:none}
+.title h1 span{display:inline-block;cursor:pointer;color:var(--c);text-shadow:0 3px 0 rgba(0,0,0,.18);transition:transform .25s var(--spring)}
+.title h1 span:hover{transform:translateY(-8px) rotate(-6deg)}
+.title h1 span.hop{animation:hop .5s var(--spring)}
+@keyframes hop{0%{transform:none}40%{transform:translateY(-16px) scale(1.15,.9)}70%{transform:translateY(2px) scale(.95,1.05)}100%{transform:none}}
+.title p{margin:6px 0 0;color:var(--muted);font-size:15px}
 
-footer{color:var(--muted);font-size:13px;text-align:center;padding:0 16px 28px}
+/* 部屋（箱と、まわりのおもちゃ） */
+.room{position:relative;max-width:920px;margin:0 auto;padding:110px 16px 0}
+.floor{height:120px;margin-top:-40px;background:repeating-linear-gradient(90deg,var(--floor) 0 120px,var(--floor2) 120px 124px);border-top:6px solid var(--wood-dd)}
+
+/* 木の箱 */
+.box{position:relative;perspective:1400px;z-index:3}
+.lid{position:absolute;left:-10px;right:-10px;top:-46px;height:56px;transform-origin:50% 100%;transform:rotateX(0deg);transition:transform 1s var(--spring);z-index:6;cursor:pointer;border:0;padding:0;background:none}
+.lid .face{position:absolute;inset:0;border:4px solid var(--wood-dd);background:repeating-linear-gradient(180deg,var(--wood-l) 0 10px,var(--wood) 10px 12px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
+.lid .knob{position:absolute;left:50%;top:-16px;width:56px;height:18px;margin-left:-28px;background:var(--wood-dd);border-radius:10px 10px 0 0}
+.lid .hint{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;letter-spacing:.2em;text-shadow:0 2px 0 var(--wood-dd);font-size:18px}
+.open .lid{transform:rotateX(118deg)}
+.open .lid .hint{opacity:0}
+.inside{position:relative;background:#6e4a2a;border:6px solid var(--wood-dd);border-bottom:0;padding:24px 18px 30px;min-height:200px;
+  background-image:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,0) 60%),repeating-linear-gradient(180deg,#7a5232 0 18px,#6e4a2a 18px 20px)}
+.front{position:relative;margin-top:-34px;z-index:5;height:96px;border:6px solid var(--wood-dd);background:repeating-linear-gradient(180deg,var(--wood-l) 0 14px,var(--wood) 14px 17px);box-shadow:0 10px 0 rgba(0,0,0,.15);display:grid;place-items:center}
+.front::before,.front::after{content:"";position:absolute;top:14px;width:14px;height:14px;border-radius:50%;background:var(--wood-dd);box-shadow:0 46px 0 var(--wood-dd)}
+.front::before{left:14px}.front::after{right:14px}
+.plate{background:var(--paper);border:4px solid var(--wood-dd);padding:4px 22px;font-weight:900;font-size:clamp(15px,3.6vw,20px);letter-spacing:.1em;transform:rotate(-1.5deg)}
+
+/* 箱の中のゲーム */
+.toys{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:22px;align-items:end;position:relative;z-index:4}
+.toy{opacity:0;transform:translateY(90px) scale(.6) rotate(var(--r,0deg));transition:transform .7s var(--spring),opacity .3s ease;transition-delay:var(--d,0s)}
+.open .toy{opacity:1;transform:translateY(0) scale(1) rotate(var(--r,0deg))}
+.pkg{display:block;width:100%;text-align:left;cursor:pointer;border:4px solid var(--wood-dd);background:var(--paper);padding:0;box-shadow:0 6px 0 rgba(0,0,0,.25);transition:transform .3s var(--spring),box-shadow .3s ease}
+.pkg:hover,.pkg:focus-visible{transform:translateY(-12px) rotate(calc(var(--r,0deg) * -1.5));box-shadow:0 16px 0 rgba(0,0,0,.2)}
+.pkg:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}
+.pkg .art{position:relative;border-bottom:4px solid var(--wood-dd);overflow:hidden}
+.pkg .art img{aspect-ratio:16/10;object-fit:cover;width:100%}
+.pkg .ribbon{position:absolute;top:10px;left:-30px;transform:rotate(-35deg);background:var(--red);color:#fff;font-weight:900;font-size:12px;letter-spacing:.1em;padding:2px 34px}
+.pkg .nm{display:block;padding:8px 12px 2px;font-weight:900;font-size:19px}
+.pkg .tg{display:block;padding:0 12px 10px;font-size:13px;color:var(--muted)}
+
+/* まだないしょの箱 */
+.secret{width:100%;aspect-ratio:1/1.05;max-height:260px;cursor:pointer;border:4px solid var(--wood-dd);background:var(--c);box-shadow:0 6px 0 rgba(0,0,0,.25);position:relative;display:grid;place-items:center;
+  background-image:radial-gradient(circle,rgba(255,255,255,.35) 3px,transparent 4px);background-size:22px 22px}
+.secret::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:18px;margin-left:-9px;background:rgba(255,255,255,.75)}
+.secret::after{content:"";position:absolute;left:0;right:0;top:50%;height:18px;margin-top:-9px;background:rgba(255,255,255,.75)}
+.secret b{position:relative;z-index:1;width:64px;height:64px;border-radius:50%;background:var(--paper);border:4px solid var(--wood-dd);display:grid;place-items:center;font-size:34px;font-weight:900;color:var(--wood-dd)}
+.secret .say{position:absolute;z-index:2;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) scale(.6);opacity:0;white-space:nowrap;background:var(--paper);border:3px solid var(--wood-dd);padding:2px 12px;font-weight:700;font-size:14px;pointer-events:none;transition:transform .3s var(--spring),opacity .2s ease}
+.secret .say::after{content:"";position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--wood-dd)}
+.secret.talk .say{opacity:1;transform:translateX(-50%) scale(1)}
+.secret.shake{animation:shake .5s ease}
+.secret:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}
+@keyframes shake{0%,100%{transform:none}20%{transform:rotate(-8deg)}40%{transform:rotate(7deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+
+/* まわりのおもちゃ（さわるとはねる） */
+.deco{position:absolute;z-index:2;border:0;padding:0;background:none;cursor:pointer}
+.deco.bounce{animation:boing .7s var(--spring)}
+@keyframes boing{0%{transform:translateY(0)}30%{transform:translateY(-60px) rotate(-20deg)}60%{transform:translateY(0) scale(1.15,.85)}80%{transform:scale(.95,1.05)}100%{transform:none}}
+.ball{width:62px;height:62px;border-radius:50%;background:conic-gradient(var(--red) 0 25%,var(--paper) 0 50%,var(--blue) 0 75%,var(--paper) 0);border:4px solid var(--wood-dd);right:4%;top:40px}
+.blk{width:52px;height:52px;border:4px solid var(--wood-dd);display:grid;place-items:center;font-weight:900;font-size:26px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.blk.a{background:var(--yellow);left:3%;top:52px;transform:rotate(-8deg)}
+.blk.b{background:var(--green);left:calc(3% + 46px);top:12px;transform:rotate(6deg)}
+.star{width:56px;height:56px;right:calc(4% + 80px);top:56px}
+.star svg{width:100%;height:100%;overflow:visible}
+
+/* 紙ふぶき */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+.confetti i{position:absolute;width:10px;height:14px;background:var(--c);animation:fall var(--t) linear forwards}
+@keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--x),var(--y)) rotate(var(--rot));opacity:0}}
+
+/* ゲームの紹介（ポップアップ） */
+dialog{border:0;padding:0;background:none;max-width:min(560px,calc(100% - 32px));width:100%;overflow:visible}
+dialog::backdrop{background:rgba(60,40,20,.45)}
+dialog[open] .card{animation:popin .45s var(--spring)}
+@keyframes popin{0%{transform:scale(.7) translateY(30px);opacity:0}100%{transform:none;opacity:1}}
+.card{background:var(--paper);border:5px solid var(--wood-dd);box-shadow:0 10px 0 rgba(0,0,0,.25);position:relative}
+.card img{width:100%;aspect-ratio:16/9;object-fit:cover;border-bottom:4px solid var(--wood-dd)}
+.card .bd{padding:14px 18px 20px}
+.card h2{margin:0;font-size:24px;font-weight:900}
+.card .tg{margin:0 0 8px;color:var(--muted);font-size:14px}
+.card .ds{margin:0 0 16px}
+.card .x{position:absolute;top:-18px;right:-14px;width:44px;height:44px;border-radius:50%;border:4px solid var(--wood-dd);background:var(--paper);cursor:pointer;font-size:22px;font-weight:900;line-height:1;box-shadow:0 3px 0 var(--wood-dd)}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:10px 26px;font-weight:900;font-size:17px;letter-spacing:.1em;text-decoration:none;border:4px solid var(--wood-dd);transition:transform .08s ease,box-shadow .08s ease}
+.btn.play{background:var(--red);color:#fff;box-shadow:0 5px 0 var(--wood-dd)}
+.btn.more{background:var(--paper);color:var(--wood-dd);box-shadow:0 5px 0 var(--wood-l)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--wood-dd)}
+.btn:focus-visible,.card .x:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+
+footer{background:var(--floor2);color:#fbe9d0;text-align:center;font-size:13px;padding:0 16px 24px;margin-top:-1px}
+
+@media (max-width:600px){
+  .room{padding-top:96px}
+  .ball{width:48px;height:48px;top:30px}
+  .star{width:44px;height:44px;right:calc(4% + 62px);top:40px}
+  .blk{width:42px;height:42px;font-size:20px}
+  .blk.b{left:calc(3% + 38px);top:6px}
+  .secret{max-height:200px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <h1>うみくりのゲームばこ</h1>
-    <p>ブラウザですぐ遊べる、うみくりのゲーム</p>
-  </div>
+<button class="snd" id="snd" aria-pressed="false" aria-label="音">
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="#6a4322" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="#6a4322" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+</button>
+
+<header class="title">
+  <h1 id="ttl" aria-label="うみくりのゲームばこ"></h1>
+  <p>ふたをあけて、すきなゲームをえらんでね</p>
 </header>
 
-<main class="wrap">
-  <!-- ゲームを足すときは、<li class="game">…</li> を1つコピーして、名前・絵・説明・リンクをかえる。絵は img/ に入れる -->
-  <ul class="games">
-    <li class="game">
-      <a class="pic" href="https://umikuri1997-lab.github.io/Hakoniwa/about.html"><img src="img/hakoniwa.webp" width="1280" height="720" alt="はこにわ暮らしのタイトル画面"></a>
-      <div class="body">
-        <h2>はこにわ暮らし</h2>
-        <p class="tag">村づくり・スマホ／パソコン</p>
-        <p class="desc">荒れた土地をまもる守り神になって、ちいさなせいれいたちと村をつくる。夜はこわいものから村を守りながら、土地ごとのお話をすすめよう。</p>
-        <div class="btns">
-          <a class="btn play" href="https://umikuri1997-lab.github.io/Hakoniwa/index.html">あそぶ</a>
-          <a class="btn more" href="https://umikuri1997-lab.github.io/Hakoniwa/about.html">しょうかい</a>
-        </div>
-      </div>
-    </li>
-  </ul>
-</main>
+<div class="room">
+  <button class="deco blk a" aria-label="つみき">う</button>
+  <button class="deco blk b" aria-label="つみき">み</button>
+  <button class="deco ball" aria-label="ボール"></button>
+  <button class="deco star" aria-label="ほし"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" fill="#f2c14e" stroke="#6a4322" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
 
+  <div class="box" id="box">
+    <button class="lid" id="lid" aria-label="ふたをあける"><span class="face"></span><span class="knob"></span><span class="hint">あける</span></button>
+    <div class="inside">
+      <!-- ゲームを足すときは、GAMES（下のプログラム）に1つ足す。絵は img/ に入れる -->
+      <ul class="toys" id="toys"></ul>
+    </div>
+    <div class="front"><span class="plate">うみくりのゲームばこ</span></div>
+  </div>
+</div>
+<div class="floor" aria-hidden="true"></div>
 <footer>うみくりのゲームばこ</footer>
+
+<dialog id="dlg">
+  <div class="card">
+    <button class="x" id="dlgX" aria-label="とじる">×</button>
+    <img id="dImg" src="" alt="" width="1280" height="720">
+    <div class="bd">
+      <h2 id="dName"></h2>
+      <p class="tg" id="dTag"></p>
+      <p class="ds" id="dDesc"></p>
+      <div class="btns"><a class="btn play" id="dPlay" href="#">あそぶ</a><a class="btn more" id="dMore" href="#">しょうかい</a></div>
+    </div>
+  </div>
+</dialog>
+
+<div class="confetti" id="conf" aria-hidden="true"></div>
+
+<script>
+/* ゲームの一覧。ふやすときは、ここに1つ足す */
+const GAMES=[
+  {name:'はこにわ暮らし',tag:'村づくり・スマホ／パソコン',img:'img/hakoniwa.webp',alt:'はこにわ暮らしのタイトル画面',
+   desc:'荒れた土地をまもる守り神になって、ちいさなせいれいたちと村をつくる。夜はこわいものから村を守りながら、土地ごとのお話をすすめよう。',
+   play:'https://umikuri1997-lab.github.io/Hakoniwa/index.html',more:'https://umikuri1997-lab.github.io/Hakoniwa/about.html',ribbon:'あそべる'},
+];
+/* まだないしょの箱（色と、ひとこと） */
+const SECRETS=[{c:'var(--blue)',say:'まだ ないしょ'},{c:'var(--pink)',say:'じゅんびちゅう'}];
+
+/* 音：ファイルを使わず、その場で作る。はじめは消しておく */
+let AC=null,SND=false;
+try{SND=localStorage.getItem('gamebako-snd')==='1'}catch(e){}
+const sndBtn=document.getElementById('snd');sndBtn.setAttribute('aria-pressed',SND);
+function tone(f0,f1,dur,type='sine',vol=.18,when=0){if(!SND)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur+.02)}catch(e){}}
+const S={
+  pop:()=>tone(300,900,.14,'sine',.2),
+  open:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,f,.22,'triangle',.14,i*.09))},
+  shake:()=>{for(let i=0;i<4;i++)tone(220+i*20,180,.06,'square',.06,i*.08)},
+  boing:()=>tone(160,520,.3,'sine',.22),
+  tap:()=>tone(660,880,.07,'triangle',.12),
+};
+sndBtn.onclick=()=>{SND=!SND;sndBtn.setAttribute('aria-pressed',SND);try{localStorage.setItem('gamebako-snd',SND?'1':'0')}catch(e){}if(SND)S.tap()};
+
+/* タイトル：1文字ずつ色をかえ、さわるとはねる */
+const COLS=['var(--red)','var(--yellow)','var(--blue)','var(--green)','var(--pink)'];
+const ttl=document.getElementById('ttl');
+[...'うみくりのゲームばこ'].forEach((ch,i)=>{const s=document.createElement('span');s.textContent=ch;s.setAttribute('aria-hidden','true');s.style.setProperty('--c',COLS[i%COLS.length]);
+  s.addEventListener('click',()=>{s.classList.remove('hop');void s.offsetWidth;s.classList.add('hop');tone(400+i*60,600+i*60,.12,'triangle',.14)});ttl.appendChild(s)});
+
+/* 箱の中身を作る */
+const toys=document.getElementById('toys'),dlg=document.getElementById('dlg');
+let n=0;
+GAMES.forEach(g=>{const li=document.createElement('li');li.className='toy';li.style.setProperty('--r',(n%2?3:-3)+'deg');li.style.setProperty('--d',(.35+n*.12)+'s');n++;
+  li.innerHTML=`<button class="pkg"><span class="art"><img src="${g.img}" alt="${g.alt}" width="1280" height="720"><span class="ribbon">${g.ribbon||''}</span></span><span class="nm"></span><span class="tg"></span></button>`;
+  li.querySelector('.nm').textContent=g.name;li.querySelector('.tg').textContent=g.tag;if(!g.ribbon)li.querySelector('.ribbon').remove();
+  li.querySelector('.pkg').onclick=()=>openGame(g);toys.appendChild(li)});
+SECRETS.forEach(s=>{const li=document.createElement('li');li.className='toy';li.style.setProperty('--r',(n%2?4:-4)+'deg');li.style.setProperty('--d',(.35+n*.12)+'s');n++;
+  li.innerHTML=`<button class="secret" aria-label="まだないしょの箱"><b>?</b><span class="say"></span></button>`;const b=li.querySelector('.secret');b.style.setProperty('--c',s.c);b.querySelector('.say').textContent=s.say;
+  b.onclick=()=>{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake','talk');S.shake();clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('talk'),1600)};toys.appendChild(li)});
+
+function openGame(g){S.pop();
+  const im=document.getElementById('dImg');im.src=g.img;im.alt=g.alt;
+  document.getElementById('dName').textContent=g.name;document.getElementById('dTag').textContent=g.tag;document.getElementById('dDesc').textContent=g.desc;
+  document.getElementById('dPlay').href=g.play;const m=document.getElementById('dMore');if(g.more){m.href=g.more;m.hidden=false}else m.hidden=true;
+  dlg.showModal()}
+document.getElementById('dlgX').onclick=()=>{S.tap();dlg.close()};
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+document.getElementById('dPlay').addEventListener('click',()=>S.pop());
+
+/* ふた：ひらくと中身がとびだす。もう一度おすと、しめて、またあける */
+const box=document.getElementById('box'),lid=document.getElementById('lid');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function openBox(){box.classList.add('open');lid.setAttribute('aria-label','ふたをしめて、もう一度あける');S.open();if(!reduce)setTimeout(confetti,250)}
+lid.onclick=()=>{if(box.classList.contains('open')){box.classList.remove('open');S.tap();setTimeout(openBox,900)}else openBox()};
+setTimeout(openBox,reduce?0:600);
+
+function confetti(){const c=document.getElementById('conf'),r=box.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top;
+  for(let i=0;i<40;i++){const p=document.createElement('i'),a=-Math.PI/2+(Math.random()-.5)*2.2,v=160+Math.random()*260;
+    p.style.cssText=`left:${cx}px;top:${cy}px;--c:${COLS[i%COLS.length]};--x:${Math.cos(a)*v}px;--y:${Math.sin(a)*v+320}px;--rot:${Math.random()*720-360}deg;--t:${1.2+Math.random()*.8}s`;
+    c.appendChild(p);setTimeout(()=>p.remove(),2200)}}
+
+/* まわりのおもちゃ：さわるとはねる */
+document.querySelectorAll('.deco').forEach(d=>d.addEventListener('click',()=>{d.classList.remove('bounce');void d.offsetWidth;d.classList.add('bounce');S.boing()}));
+</script>
 </body>
 </html>
